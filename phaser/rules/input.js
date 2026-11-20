@@ -18,7 +18,7 @@ const taps=new Map(),JOY_TAP_MS=180;
 function joyHold(){if(joy.pend&&performance.now()-joy.pend.t0>JOY_TAP_MS){joy.pend=null;if(joy.last)moveJoy(joy.last)}}
 function endJoy(e){taps.delete(e.pointerId);if(e.pointerId===joy.id){const pd=joy.pend;joy.id=null;joy.pend=null;joy.dx=joy.dy=0;if(pd&&e.type==='pointerup'&&performance.now()-pd.t0<JOY_TAP_MS&&G&&G.mode==='play')throwNet(pd.x/S,pd.y/S)}}
 cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);cv.addEventListener('lostpointercapture',endJoy);
-document.addEventListener('touchmove',e=>{if(!e.target.closest||!e.target.closest('.screen'))e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{const t=e.target;if(t.closest&&(t.closest('.screen')||t.closest('button,a,input,label,[role="button"]')))return;const tc=e.touches&&e.touches[0];if(tc&&tc.touchType==='stylus')return;e.preventDefault()},{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
 addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='Space'){e.preventDefault();useSkill()}if((e.code==='KeyK'||e.code==='KeyF')&&!e.repeat)useSkill();if(e.code==='KeyJ'&&!e.repeat&&G&&G.player){const p=G.player;p.aimLock=p.faceA!=null?p.faceA:(p.flip<0?Math.PI:0);G.kbAim=true}if(e.code==='Escape'&&G&&G.mode==='play')pauseGame()});
