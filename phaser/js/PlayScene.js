@@ -121,8 +121,8 @@ const k=left.find(sheetImgOk);
 if(!busy&&k)bakeFriendRow(T,k);
 setTimeout(tick,busy?400:30);
 };
-setTimeout(tick,window.BOOTING?0:600);
-setTimeout(loadBossSheets,window.BOOTING?0:2500);
+const begin=()=>{setTimeout(tick,window.BOOTING?0:600);setTimeout(loadBossSheets,window.BOOTING?0:2500)};
+if(game.isBooted)begin();else game.events.once('ready',begin);
 }
 function prebakeProgress(T){let s=0;for(const k of PREBAKE){const F=FSHEET[k];s+=sheetReady(T,k)?1:F._job?F._job.i/((F.rows||5)*8):0}return s/PREBAKE.length}
 const hex=c=>parseInt(c.slice(1),16);

@@ -1,9 +1,18 @@
 /* © 2026 임진삼. All rights reserved. 무단 복제·수정·배포 금지 */
 'use strict';
+function addHeroSheet(scene){
+const T=scene.textures;if(T.exists('hero'))return;
+const im=HERO_IMG_EL,FW=240,FH=440,COLS=8,W=im.naturalWidth,R=Math.floor(im.naturalHeight/FH),PER=Math.floor(4096/FH);
+if(R<=PER){T.addSpriteSheet('hero',im,{frameWidth:FW,frameHeight:FH});return}
+const parts=[];for(let r0=0;r0<R;r0+=PER){const n=Math.min(PER,R-r0),c=document.createElement('canvas');c.width=W;c.height=n*FH;c.getContext('2d').drawImage(im,0,r0*FH,W,n*FH,0,0,W,n*FH);parts.push([c,r0,n])}
+const tex=T.create('hero',parts.map(p=>p[0]));
+tex.add('__BASE',0,0,0,W,parts[0][0].height);
+parts.forEach(([c,r0,n],si)=>{for(let r=0;r<n;r++)for(let k=0;k<COLS;k++)tex.add((r0+r)*COLS+k,si,k*FW,r*FH,FW,FH)});
+}
 class TitleScene extends Phaser.Scene{
 constructor(){super('title')}
 create(){
-if(!this.textures.exists('hero'))this.textures.addSpriteSheet('hero',HERO_IMG_EL,{frameWidth:240,frameHeight:440});
+addHeroSheet(this);
 G=null;$('#hud').hidden=true;$('#skillStrip').hidden=true;showOnly('#title');refreshTitle();
 fitCamera(this);
 this.bg=addWetland(this);
