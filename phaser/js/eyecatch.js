@@ -1,7 +1,7 @@
 /* © 2026 임진삼. All rights reserved. 무단 복제·수정·배포 금지 */
 'use strict';
 const EC_WAVE=[
-{art:['1차','1차_배희'],hero:'웃음',a:'#7cc98a',b:'#ff9fb6',bg:'#fff6e4'},
+{art:['1차'] ,hero:'웃음',a:'#7cc98a',b:'#ff9fb6',bg:'#fff6e4'},
 {art:['2차'],hero:'놀람',mob:'황소개구리/보통',a:'#7cc98a',b:'#ff9fb6',bg:'#fff6e4'},
 {art:['3차_돌진'],artFb:'3차',hero:'결심' ,mob:'뉴트리아/보통',a:'#8ccf7e',b:'#ffb86b',bg:'#fff1d6'},
 {art:['4차'],hero:'걱정',mob:'가시박/작은_꼿꼿',a:'#8ccf7e',b:'#ffb86b',bg:'#fff1d6'},
