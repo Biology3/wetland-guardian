@@ -15,9 +15,26 @@
 <style>
   html,body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   #game{position:fixed;left:0;top:0}
+  /* 로고(준비) 화면(2026-11-21 선생님: 처음 열면 휴대 기기에서 버벅임) — 생물 그림 손질·보스 그림 불러오기를 여기서 다 끝내고 첫 화면으로(js/main.js bootWatch) */
+  #boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at 50% 58%,#2f5a3c 0,#173322 55%,#0c1d13 100%);color:#fff3c9;font-family:'Jua',sans-serif;text-align:center;transition:opacity .7s ease;touch-action:none}
+  #boot.out{opacity:0;pointer-events:none}
+  #boot .bKick{font-size:clamp(14px,2.2vw,20px);color:#b8d4a8;letter-spacing:3px}
+  #boot .bLogo{position:relative;font-size:clamp(46px,8.5vw,92px);line-height:1.1;color:#fff3c9;text-shadow:0 0 0 #1f2a24,3px 3px 0 #1f2a24,-3px 3px 0 #1f2a24,3px -3px 0 #1f2a24,-3px -3px 0 #1f2a24,0 6px 0 #1f2a24,0 10px 24px rgba(0,0,0,.45)}
+  #boot .bSub{font-size:clamp(17px,2.6vw,26px);color:#ffd95b;margin-top:-4px}
+  #boot .bPond{position:relative;width:min(300px,56vw);height:46px;margin:6px 0 2px}
+  #boot .bPond i{position:absolute;left:50%;top:50%;width:100%;height:100%;border:3px solid rgba(159,227,218,.7);border-radius:50%;transform:translate(-50%,-50%) scale(.08);opacity:0;animation:bootRip 2.4s ease-out infinite}
+  #boot .bPond i:nth-child(2){animation-delay:.8s}#boot .bPond i:nth-child(3){animation-delay:1.6s}
+  @keyframes bootRip{0%{transform:translate(-50%,-50%) scale(.08);opacity:.9}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+  #boot .bBar{width:min(340px,60vw);height:14px;border-radius:99px;background:rgba(255,255,255,.14);border:2.5px solid #1f2a24;overflow:hidden}
+  #boot .bBar b{display:block;height:100%;width:2%;border-radius:99px;background:linear-gradient(90deg,#ffd95b,#ffb347);animation:bootCreep 9s cubic-bezier(.1,.7,.3,1) forwards;transition:width .25s}
+  @keyframes bootCreep{to{width:35%}}
+  #boot .bMsg{font-size:clamp(14px,1.9vw,17px);color:#d6e6c8;min-height:1.3em}
+  @media (prefers-reduced-motion:reduce){#boot .bPond i{animation:none;opacity:.5;transform:translate(-50%,-50%) scale(.6)}}
 </style>
+<script>window.BOOTING=true</script>
 </head>
 <body>
+<div id="boot" role="status" aria-live="polite"><div class="bKick">배화여고 생태 미스터리</div><div class="bLogo">습지 지킴이</div><div class="bSub">사라진 울음소리</div><div class="bPond" aria-hidden="true"><i></i><i></i><i></i></div><div class="bBar" aria-hidden="true"><b></b></div><div class="bMsg">습지를 준비하고 있어요…</div></div>
 <canvas id="game" aria-label="습지 지킴이 게임 화면"></canvas>
 <section id="story" hidden aria-live="polite"></section>
 <div id="edge"></div>

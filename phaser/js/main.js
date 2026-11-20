@@ -23,6 +23,23 @@ window.__game=game;
 new MutationObserver(sync).observe(st,{attributes:true,attributeFilter:['hidden']});sync()}
 startPrebake(game);
 wireButtons();
+bootWatch(game);
+}
+function bootWatch(game){
+const box=document.getElementById('boot');if(!box){window.BOOTING=false;return}
+const t0=performance.now(),bar=box.querySelector('.bBar b'),msg=box.querySelector('.bMsg');
+let bgOk=false,bgGo=false;const loadBg=()=>{bgGo=true;try{const u=getComputedStyle(document.documentElement).getPropertyValue('--titleBg').match(/url\(["']?([^"')]+)/);const im=new Image();im.onload=im.onerror=()=>{bgOk=true};im.src=u?u[1]:'../images/배경/01_타이틀_본관_초여름.jpg';if(im.decode)im.decode().then(()=>{bgOk=true},()=>{bgOk=true})}catch(e){bgOk=true}};
+const part1=PREBAKE.slice(0,8);
+const tick=()=>{
+const T=game.textures,p=prebakeProgress(T),dt=performance.now()-t0;
+if(!bgGo&&(getComputedStyle(document.documentElement).getPropertyValue('--titleBg')||dt>500))loadBg();
+if(bar){bar.style.animation='none';bar.style.width=Math.max(parseFloat(bar.style.width)||35,Math.round(35+63*p))+'%'}
+if(msg)msg.textContent=p<.67?'습지 생물을 그리고 있어요…':'거대한 그림자가 다가와요…';
+const all=PREBAKE.every(k=>sheetReady(T,k)),one=part1.every(k=>sheetReady(T,k));
+if((all&&bgOk&&dt>900)||(one&&bgOk&&dt>12000)||dt>25000){if(bar)bar.style.width='100%';if(msg)msg.textContent='준비 끝!';setTimeout(()=>{window.BOOTING=false;box.classList.add('out');setTimeout(()=>box.remove(),800)},300);return}
+setTimeout(tick,120);
+};
+tick();
 }
 const HERO_IMG_EL=new Image();
 const OTTER_IMG_EL=new Image();if(typeof OTTER_SRC==='string')OTTER_IMG_EL.src=OTTER_SRC;

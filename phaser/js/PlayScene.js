@@ -115,14 +115,16 @@ const PREBAKE=['blue','frog','nutria','vine','heron','otter','turtle','cat','bbl
 function startPrebake(game){
 const tick=()=>{
 const T=game.textures,left=PREBAKE.filter(k=>!sheetReady(T,k));if(!left.length)return;
+if(window.BOOTING){const t0=performance.now();let k;while(performance.now()-t0<24&&(k=PREBAKE.find(x=>!sheetReady(T,x)&&sheetImgOk(x))))bakeFriendRow(T,k);setTimeout(tick,16);return}
 const busy=(typeof G!=='undefined'&&G&&G.mode==='play')||fxBusy();
 const k=left.find(sheetImgOk);
 if(!busy&&k)bakeFriendRow(T,k);
 setTimeout(tick,busy?400:30);
 };
-setTimeout(tick,600);
-setTimeout(loadBossSheets,2500);
+setTimeout(tick,window.BOOTING?0:600);
+setTimeout(loadBossSheets,window.BOOTING?0:2500);
 }
+function prebakeProgress(T){let s=0;for(const k of PREBAKE){const F=FSHEET[k];s+=sheetReady(T,k)?1:F._job?F._job.i/((F.rows||5)*8):0}return s/PREBAKE.length}
 const hex=c=>parseInt(c.slice(1),16);
 function col(c){if(c[0]==='#')return[hex(c),1];const m=c.match(/[\d.]+/g);return[(+m[0]<<16)|(+m[1]<<8)|+m[2],m[3]!=null?+m[3]:1]}
 class Pool{

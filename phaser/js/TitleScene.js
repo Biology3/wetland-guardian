@@ -11,7 +11,7 @@ this.shadowG=this.add.graphics();
 this.hero=this.add.sprite(0,0,'hero',0).setOrigin(.5,425/440);
 this.layout();
 this.started=false;
-this.go=()=>{if(this.started)return;this.started=true;enterFs();audioOn();setMusic('school');beep(520,.08,'sine',.05,780);newGame();showOnly(null);playStory('prologue',()=>playStory('day1_pre',()=>showHowto('story')));this.scene.start('play')};
+this.go=()=>{if(this.started||window.BOOTING)return;this.started=true;enterFs();audioOn();setMusic('school');beep(520,.08,'sine',.05,780);newGame();showOnly(null);playStory('prologue',()=>playStory('day1_pre',()=>showHowto('story')));this.scene.start('play')};
 this.input.keyboard.on('keydown-ENTER',()=>{if(!$('#title').hidden)this.go()});
 const onView=()=>{syncWetland(this,this.bg);this.layout()};
 this.game.events.on('view-changed',onView);
