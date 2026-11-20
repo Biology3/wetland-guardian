@@ -23,4 +23,6 @@ document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
 addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='Space'){e.preventDefault();useSkill()}if((e.code==='KeyK'||e.code==='KeyF')&&!e.repeat)useSkill();if(e.code==='KeyJ'&&!e.repeat&&G&&G.player){const p=G.player;p.aimLock=p.faceA!=null?p.faceA:(p.flip<0?Math.PI:0);G.kbAim=true}if(e.code==='Escape'&&G&&G.mode==='play')pauseGame()});
 addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyJ'&&G&&G.player)G.player.aimLock=null});
+function clearInput(){for(const k in keys)keys[k]=false;joy.id=null;joy.pend=null;joy.dx=joy.dy=0;taps.clear();if(G&&G.player)G.player.aimLock=null}
+addEventListener('blur',clearInput);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&G&&G.mode==='play')pauseGame()});

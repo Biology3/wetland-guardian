@@ -19,6 +19,8 @@ for(const k of [].concat(old||[]))if(game.textures.exists(k))game.textures.remov
 },120)};
 window.addEventListener('resize',onResize);window.addEventListener('orientationchange',onResize);
 window.__game=game;
+{const st=document.getElementById('story');let slept=false;const sync=()=>{const on=!st.hidden;if(on&&!slept&&game.loop.running){game.loop.sleep();slept=true}else if(!on&&slept){slept=false;game.loop.wake()}};
+new MutationObserver(sync).observe(st,{attributes:true,attributeFilter:['hidden']});sync()}
 startPrebake(game);
 wireButtons();
 }

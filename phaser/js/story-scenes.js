@@ -102,15 +102,16 @@ return `<rect x="-40" y="-40" width="1680" height="980" fill="#fff6d8" opacity="
 그림자:()=>`<defs><filter id="scBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter></defs>`+scSunset(.3)+
 `<g class="scShadow"><g filter="url(#scBlur)" fill="#080d0c" opacity=".82"><ellipse cx="0" cy="0" rx="300" ry="120"/><ellipse cx="-180" cy="-70" rx="70" ry="54"/><ellipse cx="-180" cy="70" rx="70" ry="54"/><path d="M200 -60C320 -140 380 -60 300 0C380 60 320 140 200 60Z"/></g></g>`+scRipples(560,520,1)+scRipples(1000,500,1.5),
 };
-function scSign({leaf=false,frog=false,night=false}={}){
+const SIGN_READ_AT=[1.2,2.7,4.2,6];
+function scSign({leaf=false,frog=false,night=false,write=false,read=false,still=false}={}){
 const wood=night?'#7a6448':'#b68a58',dark=night?'#4f3f2c':'#8a643c';
 return `<g transform="translate(800 470)">
 <ellipse cx="0" cy="300" rx="260" ry="34" fill="#2a3a22" opacity=".35"/>
 <rect x="-26" y="40" width="52" height="270" rx="8" fill="${dark}" stroke="${SC_INK}" stroke-width="8"/>
-<g class="scGrow" style="animation-delay:.1s"><rect x="-370" y="-150" width="740" height="230" rx="22" fill="${wood}" stroke="${SC_INK}" stroke-width="9"/>
+<g class="${still?'':'scGrow'}" style="animation-delay:.1s"><rect x="-370" y="-150" width="740" height="230" rx="22" fill="${wood}" stroke="${SC_INK}" stroke-width="9"/>
 <path d="M-340 -100H340M-340 -30H340M-340 40H340" stroke="${dark}" stroke-width="4" opacity=".5"/>
 <circle cx="-345" cy="-125" r="9" fill="${SC_INK}"/><circle cx="345" cy="-125" r="9" fill="${SC_INK}"/>
-<text x="0" y="-52" text-anchor="middle" font-family="Jua,sans-serif" font-size="58" fill="#3a2614">파랑이 · 개굴이 · 앞니 · 덩굴이</text>
+<text x="0" y="-52" text-anchor="middle" font-family="Jua,sans-serif" font-size="58" fill="#3a2614">${write||read?['파랑이','볼록이','앞니','덩굴이'].map((n,i)=>`<tspan class="${read?'scRead':'scWrite'}" style="animation-delay:${(read?SIGN_READ_AT[i]:1.1+i*1.15).toFixed(2)}s">${i?' · ':''}${n}</tspan>`).join(''):'파랑이 · 볼록이 · 앞니 · 덩굴이'}</text>
 <text x="0" y="28" text-anchor="middle" font-family="Jua,sans-serif" font-size="34" fill="#4a3420">사람이 데려와서, 사람 때문에 떠난 아이들</text></g>
 ${leaf?`<g class="scGrow" style="animation-delay:${night?0:.9}s">${scLeaf(250,300,1.15,-24,0,'#b89a5a')}</g>`:''}
 ${frog?`<g class="scHop"><g transform="translate(250 -186)"><ellipse cx="0" cy="0" rx="56" ry="40" fill="#8a9a4a" stroke="${SC_INK}" stroke-width="7"/><path d="M-50 18C-80 30 -84 44 -62 44M50 18C80 30 84 44 62 44" fill="none" stroke="${SC_INK}" stroke-width="7" stroke-linecap="round"/><circle cx="-24" cy="-30" r="15" fill="#fff" stroke="${SC_INK}" stroke-width="5"/><circle cx="24" cy="-30" r="15" fill="#fff" stroke="${SC_INK}" stroke-width="5"/><circle cx="-22" cy="-30" r="6" fill="${SC_INK}"/><circle cx="26" cy="-30" r="6" fill="${SC_INK}"/><path d="M-16 4Q0 14 16 4" fill="none" stroke="${SC_INK}" stroke-width="5" stroke-linecap="round"/><g class="scCroak"><ellipse cx="0" cy="22" rx="26" ry="16" fill="#f3e6a8" stroke="${SC_INK}" stroke-width="5"/></g></g>
@@ -118,7 +119,7 @@ ${frog?`<g class="scHop"><g transform="translate(250 -186)"><ellipse cx="0" cy="
 }
 Object.assign(STORY_SCENES,{
 잎흩날림:()=>{let s='';for(let i=0;i<26;i++){const x=80+((i*263)%1440),y=-60-((i*97)%300),r=(i*53)%360;s+=`<g class="scFall" style="animation-delay:${(i%9*.22).toFixed(2)}s;--dx:${((i%5)-2)*60}px">${scLeaf(x,y,.55+(i%4)*.12,r,0,['#9fb85a','#b8a858','#7fa64a','#c49a52'][i%4])}</g>`}return s},
-철문빛:()=>`<defs><radialGradient id="scDoorG"><stop offset="0" stop-color="#bfefff" stop-opacity=".95"/><stop offset=".4" stop-color="#5fc8ff" stop-opacity=".55"/><stop offset="1" stop-color="#2a8cff" stop-opacity="0"/></radialGradient></defs><g class="scDoor"><ellipse cx="467" cy="700" rx="150" ry="60" fill="url(#scDoorG)" opacity=".55"/><path d="M420 590V705M514 590V705M424 706H512" stroke="#cff4ff" stroke-width="4" stroke-linecap="round"/><path d="M420 590V705M514 590V705" stroke="#5fc8ff" stroke-width="12" stroke-linecap="round" opacity=".35"/></g>`,
+철문빛:()=>`<defs><radialGradient id="scDoorG"><stop offset="0" stop-color="#bfefff" stop-opacity=".95"/><stop offset=".4" stop-color="#5fc8ff" stop-opacity=".55"/><stop offset="1" stop-color="#2a8cff" stop-opacity="0"/></radialGradient></defs><g class="scDoor"><ellipse cx="465" cy="702" rx="150" ry="60" fill="url(#scDoorG)" opacity=".55"/><rect x="419.5" y="587.5" width="90.5" height="118.5" rx="9" fill="none" stroke="#5fc8ff" stroke-width="12" opacity=".35"/><rect x="419.5" y="587.5" width="90.5" height="118.5" rx="9" fill="none" stroke="#cff4ff" stroke-width="4"/></g>`,
 덩굴손:()=>`<g class="scDraw" style="animation-delay:.3s"><path d="M760 700C820 640 900 650 930 600C960 550 1010 560 1030 590C1046 616 1020 640 1000 626C984 614 994 596 1010 600" fill="none" stroke="${SC_INK}" stroke-width="12" stroke-linecap="round"/><path d="M760 700C820 640 900 650 930 600C960 550 1010 560 1030 590C1046 616 1020 640 1000 626C984 614 994 596 1010 600" fill="none" stroke="#6faa45" stroke-width="6" stroke-linecap="round"/></g>`,
 손바닥잎:()=>{const sk='#f2c9a8',fin=(x,h,r)=>`<rect x="${x-34}" y="${-60-h}" width="68" height="${h+90}" rx="34" fill="${sk}" stroke="${SC_INK}" stroke-width="9" transform="rotate(${r} ${x} 0)"/>`;
 return `<g transform="translate(800 560)">${fin(-120,170,-10)}${fin(-40,215,-3)}${fin(40,205,3)}${fin(115,160,10)}
@@ -126,8 +127,10 @@ return `<g transform="translate(800 560)">${fin(-120,170,-10)}${fin(-40,215,-3)}
 <path d="M-170 -40C-180 60 -160 170 -60 220C40 250 140 220 180 140C200 90 190 10 170 -40Z" fill="${sk}" stroke="${SC_INK}" stroke-width="9" stroke-linejoin="round"/>
 <path d="M-120 60C-80 110 0 130 80 110M-110 150C-60 180 20 190 90 170" fill="none" stroke="#d9a07c" stroke-width="6" stroke-linecap="round"/></g>`+`<g class="scLand">${scLeaf(800,650,1.9,-14,0,'#7fb547')}</g>`},
 팻말:()=>scSign(),
+팻말쓰기:()=>scSign({write:true}),
+팻말읽기:()=>scSign({read:true}),
 팻말잎:()=>scSign({leaf:true}),
-팻말밤:()=>`<circle cx="1320" cy="150" r="70" fill="#fff6d0" opacity=".9"/><circle cx="1320" cy="150" r="140" fill="#fff6d0" opacity=".15"/>`+scSign({leaf:true,night:true}),
-팻말맹꽁:()=>`<circle cx="1320" cy="150" r="70" fill="#fff6d0" opacity=".9"/><circle cx="1320" cy="150" r="140" fill="#fff6d0" opacity=".15"/>`+scSign({leaf:true,night:true,frog:true}),
+팻말밤:()=>`<circle cx="1320" cy="150" r="70" fill="#fff6d0" opacity=".9"/><circle cx="1320" cy="150" r="140" fill="#fff6d0" opacity=".15"/>`+scSign({night:true}),
+팻말맹꽁:()=>`<circle cx="1320" cy="150" r="70" fill="#fff6d0" opacity=".9"/><circle cx="1320" cy="150" r="140" fill="#fff6d0" opacity=".15"/>`+scSign({night:true,frog:true,still:true}),
 });
 function storySceneSvg(name){const f=STORY_SCENES[name];if(!f)return '';return `<svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g class="scInk">${f()}</g></svg>`}

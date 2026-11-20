@@ -79,35 +79,42 @@ if(k<1)raf=requestAnimationFrame(tick);else finish()};
 setTimeout(()=>{if(!fin)raf=requestAnimationFrame(tick)},i===0?150:450);
 box.onpointerdown=e=>{e.preventDefault();finish()};
 }
-function afterWave(i,pt,heal){showStamp(i,pt,()=>openTree({title:i+'차 조사 완료 · 스킬 포인트 +'+pt+(heal||''),next:{wave:i},respec:true,start:()=>showMapWalk(i,()=>startWaveStory(i))}))}
+function afterWave(i,pt,heal){showStamp(i,pt,()=>openTree({title:i+'차 조사 완료 · 스킬 포인트 +'+pt+(heal||''),next:{wave:i},respec:true,start:()=>nextEpisode(i,()=>showMapWalk(i,()=>startWaveStory(i)))}))}
 function joinOtter(){if(G.ecoOpen)return;G.ecoOpen=true;G.ecoNew=true;G.friend='otter';G.lv.gear=Math.max(1,G.lv.gear||0);G.lv.buddy=Math.max(1,G.lv.buddy||0);applyStats()}
 {const _bw=beginWave;beginWave=function(i){G.tally0=Object.assign({},G.tally);G.score0=G.score;if(i>=4||(i===3&&G.practice))joinOtter();return _bw(i)}}
 {const _bb=beginBoss;beginBoss=function(i){G.score0=G.score;clearSkillFx();return _bb(i)}}
 const RETRY_KEEP=.9;
 function retryScore(){if(G.score0!=null){G.score=Math.round(G.score0*RETRY_KEEP);hudCache={}}}
-const HELP={need:2,gaugeLoss:.5,dmg:2,hearts:2,score:.5};
+const HELP={need:2,gaugeLoss:.5,dmg:2,hearts:3,score:.5};
 const HELP_MSG={field:[{at:.6,face:'마스크_친절',t:'쌤이 도와줄게!\n힘내, 배희야!'}],boss:[{at:.6,face:'마스크_친절',t:'쌤이 도와줄게!\n힘내, 배희야!'}]};
 const HELP_BG=['04','05','06','07'];
-let FAIL={key:null,n:0};
+let FAIL={key:null,n:0,ok:false};
 const stageKey=()=>G.stage==='boss'?'b'+G.bossIdx:'w'+G.wave;
-function noteFail(){const k=stageKey();FAIL=FAIL.key===k?{key:k,n:FAIL.n+1}:{key:k,n:1};return FAIL.n===HELP.need}
-function helpOn(k){return FAIL.key===k&&FAIL.n>=HELP.need}
-function helpScene(kind,bg,then){
+function noteFail(){const k=stageKey();FAIL=FAIL.key===k?{key:k,n:FAIL.n+1,ok:FAIL.ok}:{key:k,n:1,ok:false};return FAIL.n>=HELP.need&&!FAIL.ok}
+function helpOn(k){return FAIL.key===k&&FAIL.ok}
+function offerHelp(kind,bg,retry){
 setTimeout(()=>{if(!G||G.mode!=='over')return;showOnly(null);
-const k='help_'+kind,src=STORY[k];if(!src){then();return}
-STORY._help=src.map((L,j)=>j===0?Object.assign({},L,{bg}):L);playStory('_help',then)},650);
+helpScene(kind+'_ask',bg,close=>{
+const what=kind==='boss'?'그물 힘 2배 · 하트 +3':'그물 힘 2배 · 평형 가득 · 줄어드는 양 절반',pick=f=>()=>{document.body.classList.remove('storyAsk');f()};
+document.body.classList.add('storyAsk');
+askConfirm('<b>진삼쌤의 도움</b>을 받을까?<br><small>'+what+' · 대신 이번 판 점수는 절반</small>','📻 쌤의 도움 받기','혼자 다시 도전',
+pick(()=>{FAIL.ok=true;helpScene(kind,bg,retry)}),pick(()=>helpScene(kind+'_solo',bg,retry)))},true)},650);
 }
-{const _eg=endGame;endGame=function(w){const two=!w&&G&&G.mode==='play'&&noteFail();const i=G.wave;const r=_eg(w);if(two&&!G.practice)helpScene('field','03',()=>retryWave(i));return r}}
-{const _bf=bossFail;bossFail=function(){const two=G&&G.mode==='play'&&noteFail();const i=G.bossIdx;const r=_bf();if(two&&!G.practice)helpScene('boss',HELP_BG[i]||'04',()=>retryBoss(i));return r}}
+function helpScene(kind,bg,then,hold){
+const k='help_'+kind,src=STORY[k];if(!src){then(()=>{});return}
+STORY._help=src.map((L,j)=>j===0?Object.assign({},L,{bg}):L);playStory('_help',then,hold);
+}
+{const _eg=endGame;endGame=function(w){const ask=!w&&G&&G.mode==='play'&&noteFail();const i=G.wave;const r=_eg(w);if(ask&&!G.practice)offerHelp('field','03',()=>retryWave(i));return r}}
+{const _bf=bossFail;bossFail=function(){const ask=G&&G.mode==='play'&&noteFail();const i=G.bossIdx;const r=_bf();if(ask&&!G.practice)offerHelp('boss',HELP_BG[i]||'04',()=>retryBoss(i));return r}}
 {const _bw=beginWave;beginWave=function(i){G.help=helpOn('w'+i);applyStats();const r=_bw(i);if(G.help){G.gauge=100;G.helpMsg=HELP_MSG.field;helpStart()}else G.helpMsg=null;return r}}
 {const _bb=beginBoss;beginBoss=function(i){G.help=helpOn('b'+i);const r=_bb(i);if(G.help){G.helpMsg=HELP_MSG.boss;helpStart()}else G.helpMsg=null;return r}}
 function helpStart(){updateHud(true);for(let k=0;k<3;k++)setTimeout(()=>beep(660+k*220,.12,'triangle',.06),k*120)}
 {const _as=applyStats;applyStats=function(){_as();if(!G||!G.help)return;const p=G.player;p.dmg*=HELP.dmg;if(G.stage==='boss')p.maxHp+=HELP.hearts}}
 function helpEnd(){
-FAIL={key:null,n:0};if(!G.help)return;
+FAIL={key:null,n:0,ok:false};if(!G.help)return;
 const gain=G.score-(G.score0||0);if(gain>0){const cut=Math.round(gain*(1-HELP.score));G.score-=cut;G.floats.push({x:W/2,y:H*.66-50,txt:'쌤의 도움 · 점수 절반 (-'+cut+')',col:'#cfe9ff',big:true,t:-.3})}
 G.help=false;G.helpMsg=null;applyStats();hudCache={};
 }
 {const _ew=endWave;endWave=function(){const r=_ew();helpEnd();return r}}
 {const _bw2=bossWin;bossWin=function(){const m=G&&G.mode;const r=_bw2();if(m==='play')helpEnd();return r}}
-{const _ng=newGame;newGame=function(){FAIL={key:null,n:0};return _ng()}}
+{const _ng=newGame;newGame=function(){FAIL={key:null,n:0,ok:false};return _ng()}}

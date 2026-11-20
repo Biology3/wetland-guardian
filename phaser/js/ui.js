@@ -28,10 +28,10 @@ function waveCard(title,i){
 showOnly('#brk');renderNext({wave:i});$('#treeWrap').classList.add('solo');$('#brkTitle').textContent=title;$('#btnRespec').hidden=true;$('#btnGo').textContent='출발!';$('#btnGo').onclick=()=>beginWave(i);
 }
 function firstWaveScreen(){waveCard('1차 조사',0)}
-function pauseGame(){if(G.mode!=='play')return;$('#warn').hidden=true;G.mode='pause';joy.id=null;joy.dx=joy.dy=0;showOnly('#pause')}
-function askConfirm(html,yes,no,fn){
+function pauseGame(){if(G.mode!=='play')return;$('#warn').hidden=true;G.mode='pause';joy.id=null;joy.dx=joy.dy=0;$('#btnTrainSkill').hidden=!G.training;showOnly('#pause')}
+function askConfirm(html,yes,no,fn,noFn){
 $('#goAskTxt').innerHTML=html;$('#btnAskYes').textContent=yes;$('#btnAskNo').textContent=no;$('#goAsk').hidden=false;beep(520,.1,'triangle',.06,660);
-$('#btnAskYes').onclick=()=>{$('#goAsk').hidden=true;fn()};$('#btnAskNo').onclick=()=>{$('#goAsk').hidden=true};
+$('#btnAskYes').onclick=()=>{$('#goAsk').hidden=true;fn()};$('#btnAskNo').onclick=()=>{$('#goAsk').hidden=true;if(noFn)noFn()};
 }
 function showResult(o){
 $('#resCode').hidden=true;$('#btnShot').hidden=!o.shot;
@@ -61,7 +61,7 @@ function wireButtons(){
 $('#btnStart').onclick=()=>{const t=window.__game&&__game.scene.getScene('title');if(t&&t.go)t.go()};
 $('#btnFs1').onclick=()=>fsEl()?exitFs():enterFs();
 $('#btnDev').onclick=()=>{audioOn();openDev()};
-$('#btnHow').onclick=()=>{if(HOW_FROM==='menu')showOnly('#title');else beginWave(0)};
+$('#btnHow').onclick=()=>{if(HOW_FROM==='menu')showOnly('#title');else{showOnly(null);eyeCatch(0,()=>beginWave(0))}};
 $('#btnPause').onclick=()=>pauseGame();
 $('#btnResume').onclick=()=>{if(STORY_NOW&&STORY_NOW.paused){STORY_NOW.resume();return}if(typeof MENU_OPEN!=='undefined'&&MENU_OPEN){closeMenuPause();return}G.mode='play';showOnly(null)};
 $('#btnStorySkip').onclick=()=>{if(STORY_NOW)STORY_NOW.skip()};
@@ -71,5 +71,5 @@ $('#btnQual').onclick=()=>{QUAL=QUAL?0:1;$('#btnQual').textContent=QUAL?'그래�
 $('#btnHome').onclick=()=>askConfirm('<b>처음 화면</b>으로 갈까요?<br><small>지금 하던 게임은 사라져요</small>','처음으로','취소',goTitle);
 $('#btnAgain').onclick=()=>askConfirm('<b>처음 화면</b>으로 갈까요?','처음으로','취소',goTitle);
 $('#btnFs2').onclick=()=>fsEl()?exitFs():enterFs();
-wireTree();wireStages();wireMenu();syncFs();
+wireTree();wireStages();wireMenu();syncFs();wireFabs();
 }

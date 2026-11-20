@@ -1,13 +1,10 @@
 /* © 2026 임진삼. All rights reserved. 무단 복제·수정·배포 금지 */
 'use strict';
-const SHADOW={dmg:[0,.3,.25]};
-function shadowSpots(p,f){const n=syn('shadow');if(!n)return[];
-return n===1?[{x:p.x-f*56,y:p.y+6}]:[{x:p.x-f*52,y:p.y-26},{x:p.x-f*52,y:p.y+38}]}
-const FOODWEB={gauge:1.5,bossHits:3};
-const ASSEMBLE={every:10,stay:3,hits:2,cd:1.2,dmg:1,r:40,range:320,first:4};
+function shadowSpots(){return[]}
+const ASSEMBLE=SK.assemble;
 function stepGuest(dt){
 const p=G.player;
-if(!syn('proxy')||!G.friend||G.mode!=='play'){G.guests=null;G.guestT=ASSEMBLE.first;return}
+if(!L('assemble')||!G.friend||G.mode!=='play'){G.guests=null;G.guestT=ASSEMBLE.first;return}
 G.guestT=(G.guestT??ASSEMBLE.first)-dt;
 if(!G.guests&&G.guestT<=0){G.guestT=ASSEMBLE.every;
 G.guests=FRIENDS.filter(k=>k!==G.friend).map((k,i)=>{const s=i?-1:1;return{k,side:s,x:p.x+s*70,y:p.y+(i?-20:22),t:0,hop:0,act:null,cd:.35+i*.3,left:ASSEMBLE.hits,alpha:0}});
@@ -35,71 +32,105 @@ return best}
 function guestSlam(g){
 const x=g.x,y=g.y,R=ASSEMBLE.r;
 burst(x,y+8,['#ffd95b','#fff','#e9f7d6'],10,200);beep(300,.1,'sine',.07,160);if(!reduced)G.shake=Math.max(G.shake,.06);
-for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-x,e.y-(e.z||0)-y)<R+SPEC[e.type].r*.5){e.hp-=ASSEMBLE.dmg;e.hit=.25;if(e.hp<=0)kill(e)}}
-const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-x,r.y-y)<R)cutRoot(r);if(G.boss===b&&!b.air&&!b.under&&!b.deadT&&hyp(b.x-x,b.y-y)<b.r*.8+R)hitBoss(ASSEMBLE.dmg,true)}
+for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-x,e.y-(e.z||0)-y)<R+SPEC[e.type].r*.5){e.hp-=ASSEMBLE.dmg*WK();e.hit=.25;if(e.hp<=0)kill(e)}}
+const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-x,r.y-y)<R)cutRoot(r);if(G.boss===b&&!b.air&&!b.under&&!b.deadT&&hyp(b.x-x,b.y-y)<b.r*.8+R)hitBoss(ASSEMBLE.dmg) }
 }
-const BOLT={range:260,len:240,dur:.22,boltDur:.16,trailDmg:[0,1,2,3],boltBonus:[0,1,1.3],cd:3,strikes:3,strikeDmg:1,strikeR:62};
-function startBoltDash(p,lv){
-if(G.clock-(G.boltDashAt??-99)<BOLT.cd)return; G.boltDashAt=G.clock;
-const dmg=BOLT.trailDmg[L('trail')]+BOLT.boltBonus[lv||0];
-let t=null,best=BOLT.range;const b=G.boss;
-if(b&&!b.air&&!b.under&&!b.deadT&&hyp(b.x-p.x,b.y-p.y)<BOLT.range+b.r)t=b;
-if(!t)for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;const d=hyp(e.x-p.x,e.y-(e.z||0)-p.y);if(d<best){best=d;t=e}}
-const a=t?Math.atan2(t.y-(t.z||0)-p.y,t.x-p.x):(p.faceA!=null?p.faceA:(p.flip<0?Math.PI:0));
-const len=t?Math.min(BOLT.len,hyp(t.x-p.x,t.y-p.y)+(t===b?0:50)):BOLT.len*.6;
-G.bdash={t:0,dur:lv?BOLT.boltDur:BOLT.dur,dmg,a,len,target:t,hit:new Set(),hitPts:[],lv:lv||0,path:[{x:p.x,y:p.y}],gone:0,queue:null};
-p.thrA=Math.atan2(Math.sin(a)/HK,Math.cos(a));if(lv){beep(1500,.06,'square',.05,300);beep(300,.18,'sawtooth',.04,900)}else{beep(420,.14,'sine',.06,900)}
+function zapShock(p,lv){
+const S=SK.zap.shock,R=S.r,col=lv===1?'cyan':'gold';
+const fy=p.y+20;
+for(let i=0;i<10;i++){const a=i/10*TAU+rnd(-.2,.2),c=Math.cos(a),s=Math.sin(a),pts=[[p.x+c*R*.16,fy+s*R*.62*.16]];let x,y;for(let j=1;j<=5;j++){const k=.16+.84*j/5;x=p.x+c*R*k+rnd(-12,12);y=fy+s*R*.62*k+rnd(-9,9);pts.push([x,y])}G.bolts.push({x,y,t:-.02*(i%3),pts,ring:1,col,w:.6,back:s<0?1:0})}
+G.shocks.push({x:p.x,y:fy,t:0,r:R,blue:lv===1?1:0,flat:1});flashAt(p.x,fy,R*.45,lv===1?'#dff6ff':'#fff1a8',.2);beep(900,.08,'square',.05,1800);beep(200,.18,'sawtooth',.05,90);
+for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-p.x,e.y-(e.z||0)-p.y)<R+SPEC[e.type].r*.5){e.hp-=S.dmg*WK();e.hit=.25;sparks(e.x,e.y-(e.z||0),6,'#ffe98a');if(e.hp<=0)kill(e)}}
+const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-p.x,r.y-p.y)<R)cutRoot(r);if(G.boss===b&&!b.air&&!b.shield&&hyp(b.x-p.x,b.y-p.y)<R+b.r*.7)hitBoss(S.dmg,S.boss)}
 }
-const KNOT={frz:[0,.7,1],rest:2};
-const TRAP={n:[0,2,3],linger:[0,.8,1.2],dmg:[0,.8,1],r:.85};
-function dropTraps(d){
-const tr=syn('trap'),p=G.player,path=d.path,n=TRAP.n[tr];if(!tr||!path||path.length<2)return;
-const share={caught:new Set(),boss:false};
-for(let i=0;i<n;i++){const q=path[Math.min(path.length-1,Math.round((i+.5)/n*(path.length-1)))],x=q.x,y=q.y+10;
-G.nets.push({x0:x,y0:y,x1:x,y1:y,t:.06,dur:.06,r:p.netR*TRAP.r,rp:NET_R[0]*TRAP.r,dmg:p.dmg*TRAP.dmg[tr],land:.0001,linger:TRAP.linger[tr],trap:true,auto:true,caught:share.caught,share})}
-beep(560,.08,'triangle',.05,760);
+function startZap(p,lv){
+const Z=SK.zap,n=Z.strikes[lv],dur=Z.dur[lv];
+G.zap={t:0,dur,lv,left:n,next:Z.first,gap:Z.strikeGap,struck:new Set()}; if(Z.charges[lv])p.zapNets=Z.charges[lv];
+const hd=typeof HERO_CALL!=='undefined'&&HERO_CALL?heroHand(p):{x:p.x,y:p.y-150},cx=hd.x,cy=hd.y,col=lv===1?'cyan':'gold';
+if(lv>=1){
+const sx=cx+rnd(-30,30),sy=Math.max(30,cy-380),pts=[[sx,sy]];for(let j=1;j<7;j++){const k=j/7;pts.push([sx+(cx-sx)*k+rnd(-28,28)*(1-k*.6),sy+(cy-sy)*k])}pts.push([cx,cy]);
+G.bolts.push({x:cx,y:cy,t:0,pts,wrap:1,back:1,col,w:lv>=2?1.8:1.15});
+flashAt(cx,cy-6,lv>=2?80:60,lv===1?'#dff6ff':'#fff1a0',.2);G.shocks.push({x:p.x,y:p.y+20,t:0,r:lv>=2?130:100,blue:lv===1?1:0,flat:1});punch(lv>=2?.09:.05,lv>=2?.2:.12);heroPose('zap');
+beep(90,.4,'sawtooth',lv>=2?.09:.06,45);
+const rounds=lv>=2?[[.22,135,6],[.46,195,6]]:[[.22,130,5]];
+rounds.forEach(([at,R,n],ri)=>{const a0=rnd(0,TAU);for(let i=0;i<n;i++){const a=a0+i/n*TAU+rnd(-.15,.15),gx=p.x+Math.cos(a)*R,gy=p.y+18+Math.sin(a)*R*.55,top=Math.max(30,gy-360),bp=[[gx+rnd(-25,25),top]];
+for(let j=1;j<6;j++){const k=j/6;bp.push([bp[0][0]+(gx-bp[0][0])*k+rnd(-18,18)*(1-k),top+(gy-top)*k])}bp.push([gx,gy]);G.bolts.push({x:gx,y:gy,t:-at-i*.015,pts:bp,ring:1,col,back:gy<p.y+18?1:0})}
+setTimeout(()=>{if(!G||!G.zap)return;punch(.03+.015*ri,.08);beep(1300-ri*250,.06,'square',.05,240);beep(70,.25,'sawtooth',.05,40)},at*1000)});
 }
-function boltAt(x,y,d){
+zapShock(p,lv);
+const spx=lv?cx:p.x,spy=lv?cy:p.y-60;
+sparks(spx,spy,lv?18:10,lv===1?'#bfe8ff':'#ffe98a',lv?340:240);if(lv>=2)sparks(spx,spy,14,'#fff6b0',360);
+float(p.x,p.y-200,lv>=2?'천둥 거품!':lv?'번개 거품!':'찌릿 거품!','#fff6b0',true);
+beep(1500,.06,'square',.05,300);setTimeout(()=>beep(300,.2,'sawtooth',.04,1200),60);
+}
+const STRIKE_R=62;
+function boltAt(x,y,dmg,bossK){
 const pts=[];let y0=Math.max(70,y-300),x0=x+rnd(-34,34);pts.push([x0,y0]);for(let i=1;i<6;i++){const k=i/6;pts.push([x+rnd(-26,26)*(1-k),y0+(y-y0)*k])}pts.push([x,y]);
-G.bolts.push({x,y,t:0,pts});punch(.03,.1);burst(x,y,['#fff','#ffe98a','#bfe3fb'],8,190);beep(1400,.05,'square',.05,240);
-for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-x,e.y-(e.z||0)-y)<BOLT.strikeR+SPEC[e.type].r*.4){e.hp-=BOLT.strikeDmg;e.hit=.25;if(e.hp<=0)kill(e)}}
-const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-x,r.y-y)<BOLT.strikeR)cutRoot(r);if(G.boss===b&&!b.air&&!b.under&&!b.deadT&&!(d&&d.bossStruck)&&hyp(b.x-x,b.y-y)<b.r*.8+BOLT.strikeR*.5){if(d)d.bossStruck=true;hitBoss(BOLT.strikeDmg,true)}}
+const cy=G.zap&&G.zap.lv===1;
+G.bolts.push({x,y,t:0,pts,col:cy?'cyan':undefined});punch(.03,.1);burst(x,y,cy?['#fff','#bfe8ff','#7ff0ff']:['#fff','#ffe98a','#fff1a0'],8,190);beep(1400,.05,'square',.05,240);
+for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-x,e.y-(e.z||0)-y)<STRIKE_R+SPEC[e.type].r*.4){e.hp-=dmg*WK();e.hit=.25;if(e.hp<=0)kill(e)}}
+const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-x,r.y-y)<STRIKE_R)cutRoot(r);if(G.boss===b&&!b.air&&!b.under&&!b.deadT&&hyp(b.x-x,b.y-y)<b.r*.8+STRIKE_R*.5)hitBoss(dmg,bossK)}
 }
-function stepBoltDash(dt){
-const d=G.bdash;if(!d)return;const p=G.player;
-if(d.t<d.dur){d.t+=dt;
-const t=d.target;if(t&&!t.dead&&!(t===G.boss&&(t.air||t.under))){const want=Math.atan2(t.y-(t.z||0)-p.y,t.x-p.x),da=((want-d.a)%TAU+TAU*1.5)%TAU-Math.PI;d.a+=da*Math.min(1,dt*14)}
-const v=d.len/d.dur;p.x=clamp(p.x+Math.cos(d.a)*v*dt,40,W-40);p.y=clamp(p.y+Math.sin(d.a)*v*dt,112,H-44);p.inv=Math.max(p.inv,.15);p.thrT=Math.max(p.thrT||0,.12);
-d.path.push({x:p.x,y:p.y});
-for(const e of G.ents){if(e.dead||e.prot||e.born<.25||d.hit.has(e))continue;if(hyp(e.x-p.x,e.y-(e.z||0)-p.y)<44+SPEC[e.type].r*.5){d.hit.add(e);d.hitPts.push({x:e.x,y:e.y-(e.z||0)});e.hp-=d.dmg;e.hit=.25;if(d.lv){sparks(e.x,e.y-(e.z||0),8,'#ffe98a');beep(900,.04,'square',.04,1600)}else{burst(e.x,e.y-(e.z||0),['#fff','#bfe3fb','#8fc7f5'],7,160);beep(620,.05,'sine',.05,900)}if(e.hp<=0)kill(e)}}
-const b=G.boss;if(b){if(!d.hit.has(b)&&!b.air&&!b.under&&!b.deadT&&hyp(b.x-p.x,b.y-p.y)<b.r*.8+30){d.hit.add(b);d.hitPts.push({x:b.x,y:b.y});hitBoss(d.dmg,true)}for(const r of b.roots)if(r.alive&&hyp(r.x-p.x,r.y-p.y)<50)cutRoot(r)}
-if(d.t>=d.dur&&syn('trap')&&!d.trapped){d.trapped=true;dropTraps(d)}
-if(d.t>=d.dur&&d.lv>=2){const n=BOLT.strikes,spots=d.hitPts.slice(0,n);for(let i=spots.length;i<n;i++){const q=d.path[Math.floor((i+.5)/n*(d.path.length-1))];spots.push(q)}d.queue=spots.map((q,i)=>({at:.06+.1*i,x:q.x,y:q.y}))}
-}else{d.gone+=dt;if(d.queue)while(d.queue.length&&d.queue[0].at<=d.gone){const q=d.queue.shift();boltAt(q.x,q.y,d)}
-if(d.gone>.5&&!(d.queue&&d.queue.length))G.bdash=null}
+function stepZap(dt){
+const z=G.zap;if(!z)return;const p=G.player,Z=SK.zap,b=G.boss;z.t+=dt;
+if(z.t>=z.dur){sparks(p.x,p.y-38,8,z.lv===1?'#bfe8ff':'#fff6b0',200);G.zap=null;return}
+if(z.left>0&&z.t>=z.next){
+let t=null,best=1e9,t2=null,best2=1e9;
+const cand=(o,x,y)=>{const d=hyp(x-p.x,y-p.y);if(d>Z.range)return;if(!z.struck.has(o)&&d<best){best=d;t={o,x,y}}if(d<best2){best2=d;t2={o,x,y}}};
+for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;cand(e,e.x,e.y-(e.z||0))}
+if(b&&!b.air&&!b.under&&!b.deadT)cand(b,b.x,b.y);
+const q=t||t2;if(q){z.struck.add(q.o);boltAt(q.x,q.y,Z.strikeDmg[z.lv],Z.shock.boss);z.left--;z.next=z.t+z.gap}else z.next=z.t+.15;
 }
-const TIDE={linger:1.5,tick:.08,dmg:.35};
-function tideTick(n,dt){
-n.dotT=(n.dotT??TIDE.tick)-dt;if(n.dotT>0)return;n.dotT=TIDE.tick;n.tk=(n.tk||0)+1;beep(1400+(n.tk%3)*160,.02,'square',.014);
-for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-n.x1,e.y-(e.z||0)-n.y1)<n.r+SPEC[e.type].r*.55){e.hp-=TIDE.dmg;e.hit=.15;if(n.tk%2)burst(e.x,e.y,['#e6f7ff','#8fc7f5'],2,110);if(e.hp<=0)kill(e)}}
-const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-n.x1,r.y-n.y1)<n.r+26)cutRoot(r);if(G.boss===b&&!b.air&&!b.under&&!b.shield&&hyp(b.x-n.x1,b.y-n.y1)<n.r+b.r*.72)hitBoss(TIDE.dmg)}
 }
 const NBOSS_CHEW=2;
 const NUTRIA_REACH=1.3;
 const NUTRIA_DASH=0.9;
 const SUMMON_N=[2,3];
 const SUMMON_MAX={blue:8,frog:6};
-const SUMMON_RATE=2/3;
+const SUMMON_RATE=1/3;
+const SUMMON_ONCE={blue:[3,6],frog:[2,3]};
+function summonOnce(b,k){const ph=b.phase>1?1:0;b.sumDone=b.sumDone||[false,false];if(b.sumDone[ph])return 0;b.sumDone[ph]=true;return SUMMON_ONCE[k][ph]}
+const NBOSS_REACH=1.5;
+function vineForestSpot(){const p=G.player;let best=null,bd=-1;for(const e of G.ents)if(e.type==='vine'&&!e.dead){const d=hyp(e.x-p.x,e.y-p.y);if(d>bd){bd=d;best=e}}return best?{x:best.x,y:best.y}:null}
 function summonTurn(b){b.sumAcc=(b.sumAcc===undefined?1-SUMMON_RATE:b.sumAcc)+SUMMON_RATE;if(b.sumAcc>=1-1e-9){b.sumAcc-=1;return true}return false}
-const SURGE={dmg:[[0],[1.5,1],[2,1,1]],push:[0,150,200],latePush:40,gap:.3,grow:[1,1.3,1.55]};
-function surgeStart(p,R,lv,k){
-G.surgeQ=G.surgeQ||[];
-for(let i=1;i<SURGE.dmg[lv].length;i++){G.surgeQ.push({x:p.x,y:p.y,r:R*SURGE.grow[i],at:G.clock+SURGE.gap*i,dmg:SURGE.dmg[lv][i]*k});G.swirls.push({x:p.x,y:p.y,t:-SURGE.gap*i,r:R*SURGE.grow[i],out:1})}
+const SURGE_GAP=.32;
+function surgeStart(p,R,lv){
+G.surgeQ=G.surgeQ||[];const list=lv>=2?[SK.wave,SK.wave2]:[SK.wave];
+list.forEach((c,i)=>{const big=c===SK.wave2,at=SURGE_GAP*(i+1)+(big?.12:0);G.surgeQ.push({x:p.x,y:p.y,r:R*c.grow,at:G.clock+at,dmg:c.dmg,push:c.push,big});G.swirls.push({x:p.x,y:p.y+20,t:-at,r:R*c.grow,out:1,big})});
 }
 function stepSurge(){
 if(!G.surgeQ||!G.surgeQ.length)return;
-for(const q of G.surgeQ){if(q.done||G.clock<q.at)continue;q.done=true;beep(240,.14,'sine',.06,140);
-for(const e of G.ents){if(e.dead||e.prot||e.born<.25)continue;if(hyp(e.x-q.x,e.y-(e.z||0)-q.y)<q.r+SPEC[e.type].r*.5){e.hp-=q.dmg;e.hit=.25;burst(e.x,e.y,['#fff','#8fc7f5'],5,170);if(e.hp<=0)kill(e);else if(e.type!=='vine')shove(e,q.x,q.y,SURGE.latePush)}}
-const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-q.x,r.y-q.y)<q.r)cutRoot(r);if(G.boss===b&&!b.air&&!b.shield&&hyp(b.x-q.x,b.y-q.y)<q.r+b.r*.7)hitBoss(.6*q.dmg,true)}}
+for(const q of G.surgeQ){if(q.done||G.clock<q.at)continue;
+if(!q.started){q.started=true;q.hitE=new Set();q.bossHit=false;
+G.shocks.push({x:q.x,y:q.y+20,t:0,r:q.r,blue:1,flat:1});
+beep(q.big?120:240,q.big?.3:.14,q.big?'sawtooth':'sine',q.big?.09:.06,q.big?60:140);
+if(q.big){G.waves.push({x:q.x,y:q.y+20,t:0,r:q.r});burst(q.x,q.y,['#fff','#bfe3fb','#5aa9e6'],24,420);flashAt(q.x,q.y,q.r*1.2,'#bfe3fb',.4);punch(.08,.22);float(q.x,q.y-110,'해일!','#d6efff',true)}}
+const el=G.clock-q.at,k=Math.min(1,el/.5),ee=1-(1-k)*(1-k),rr=Math.min(q.r,q.r*(.3+.8*ee));
+for(const e of G.ents){if(e.dead||e.prot||e.born<.25||q.hitE.has(e))continue;if(hyp(e.x-q.x,e.y-(e.z||0)-q.y)<rr+SPEC[e.type].r*.5){q.hitE.add(e);e.hp-=q.dmg*WK();e.hit=.25;burst(e.x,e.y,['#fff','#8fc7f5'],5,170);if(e.hp<=0)kill(e);else if(e.type!=='vine')shove(e,q.x,q.y,q.push*.4)}}
+for(const h of G.hz)if(h.k==='s'&&hyp(h.x-q.x,h.y-q.y)<rr)h.t=99;
+const b=G.boss;if(b){for(const r of b.roots)if(r.alive&&hyp(r.x-q.x,r.y-q.y)<rr)cutRoot(r);if(!q.bossHit&&G.boss===b&&!b.air&&!b.shield&&hyp(b.x-q.x,b.y-q.y)<rr+b.r*.7){q.bossHit=true;hitBoss(q.dmg,SK.burst.boss)}}
+if(rr>=q.r||el>.6)q.done=true}
 G.surgeQ=G.surgeQ.filter(q=>!q.done);
+}
+const TRAIN={win:10,idle:4};
+function beginTraining(){G.trainClock=0;
+beginBoss(3);const b=G.boss;G.training=true;b.roots=[];b.shield=false;b.ai={next:()=>({value:99})};b.name='허수아비 · 왕 가시박';
+G.trainDmg=0;G.trainLog=[];G.trainT0=G.trainClock;G.trainLast=null;
+float(W/2,H*.22,'전투 트레이닝 · 마음껏 때려 보세요!','#fff3c9',true);updateHud(true);
+}
+function trainDps(){const now=G.trainClock,w=Math.min(TRAIN.win,Math.max(1,now-G.trainT0));G.trainLog=G.trainLog.filter(q=>now-q.t<=TRAIN.win);return G.trainLog.reduce((s,q)=>s+q.d,0)/w}
+function trainHit(v){if(G.trainLast==null)G.trainT0=G.trainClock; G.trainDmg+=v;G.trainLog.push({t:G.trainClock,d:v});G.trainLast=G.trainClock}
+function trainReset(){const b=G.boss;if(b){b.hp=b.max;b.phase=1}G.trainDmg=0;G.trainLog=[];G.trainT0=G.trainClock;G.trainLast=null;if(b)float(b.x,b.y-b.r-40,'처음부터 다시 재요','#eef6fb');beep(520,.08,'sine',.04,780)}
+function stepTraining(dt){
+const b=G.boss,p=G.player;if(!b)return;G.clock+=dt;G.t+=dt;const de=dt*fogK();
+G.trainClock=(G.trainClock||0)+(G.stopT>0?0:dt);
+movePlayer(dt);stepSkill(dt);stepComp(dt);stepGuest(dt);updateNets(dt);if(G.mode!=='play'||!G.boss)return;
+for(const e of G.ents){if(e.dead)continue;e.born+=de;e.hit=Math.max(0,(e.hit||0)-de);applyKb(e,dt);if(SPEC[e.type].prot)updateProt(e,de)}
+G.ents=G.ents.filter(e=>!e.dead&&!e.gone);keepEntsOut();stepHeron(dt);stepPreds(dt);
+p.hp=p.maxHp;b.flash=Math.max(0,b.flash-de);b.puff=Math.max(0,b.puff-de);b.stun=0;b.win=0;
+if(G.trainLast!=null&&G.trainClock-G.trainLast>=TRAIN.idle)trainReset();
+}
+function reviveDummy(b){
+b.hp=b.max;b.phase=1;b.flash=.2;
+burst(b.x,b.y,['#fff','#bfe28a','#7cb94f'],22,300);flashAt(b.x,b.y,b.r*1.4,'#d6f5c8',.35);float(b.x,b.y-b.r-40,'다시 일어났어요!','#d6f5c8',true);beep(660,.12,'triangle',.06,990);
 }

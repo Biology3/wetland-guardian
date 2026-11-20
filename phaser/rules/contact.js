@@ -29,11 +29,10 @@ function bossTouch(b){
 const p=G.player;if(!b||b.air||b.under||b.deadT||p.inv>0||p.stun>0)return;
 if(hyp(p.x-b.x,p.y-b.y)<b.r*BOSS_BODY+HERO_BODY)hurtPlayer(b);
 }
-const SPROUT={gauge:.5,bossHits:8};
 function sproutHit(t,isBoss){
-const lv=syn('sprout');if(!lv)return;const p=G.player,need=ECO_SYN.sproutBoss[lv],gain=ECO_SYN.sproutGauge[lv];
+if(L('otter')<3)return;const p=G.player,need=SK.otter.boss,gain=SK.otter.gauge;
 if(isBoss){t.sprout=(t.sprout||0)+1;const k=t.sprout%need;
-if(k===0&&p.hp<p.maxHp){p.hp++;float(p.x,p.y-70,'새싹 지킴이! 하트 +1','#e9f7d6',true);burst(p.x,p.y,['#9fe08a','#e9f7d6','#fff'],12,200);beep(880,.12,'triangle',.07,1320)}
-else float(t.x,t.y-t.r-24,'새싹 지킴이 '+(k||need)+'/'+need,'#e9f7d6')}
-else if(G.stage==='field'){G.gauge=Math.min(100,G.gauge+gain);float(t.x,t.y-74,'새싹 지킴이! 평형 +'+gain,'#e9f7d6')}
+if(k===0&&p.hp<p.maxHp&&!NOHEAL()){p.hp++; float(p.x,p.y-70,'달이의 응원! 하트 +1','#e9f7d6',true);burst(p.x,p.y,['#9fe08a','#e9f7d6','#fff'],12,200);beep(880,.12,'triangle',.07,1320)}
+else float(t.x,t.y-t.r-24,'달이의 응원 '+(k||need)+'/'+need,'#e9f7d6')}
+else if(G.stage==='field'){G.gauge=Math.min(100,G.gauge+gain);float(t.x,t.y-74,'달이의 응원! 평형 +'+gain,'#e9f7d6')}
 }

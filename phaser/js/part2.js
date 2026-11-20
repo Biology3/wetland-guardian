@@ -42,15 +42,17 @@ const svg='<svg class="tmArt" viewBox="0 0 1000 500" preserveAspectRatio="none" 
 +'<path d="'+path+'" fill="none" stroke="#cdb47c" stroke-width="4" stroke-dasharray="4 16" stroke-linecap="round"/></svg>';
 const pts=MTN_PTS.map(([x,y],k)=>'<div class="tmPt'+(k<i?' done':k===i?' next':'')+'" style="left:'+x+'%;top:'+y+'%"><b>'+(k<i?'✔':k+1)+'</b><span>'+BOSS_EP[k].place+'</span></div>').join('')
 +'<div class="tmPt top" style="left:'+MTN_TOP[0]+'%;top:'+MTN_TOP[1]+'%"><b>?</b><span>정상</span></div>';
-box.innerHTML='<div class="tmBox"><h2 class="tmHead">보스 '+(i+1)+' · '+BOSS_EP[i].place+'</h2><div class="tmMap">'+svg+pts+'<div class="tmHero"><img src="../images/주인공/표정_결심.png" alt=""></div></div><p class="tmTap">화면을 톡 하면 바로 출발</p></div>';
-const hero=box.querySelector('.tmHero'),from=i===0?MTN_FOOT:MTN_PTS[i-1],to=MTN_PTS[i];
-const place=([x,y])=>{hero.style.left=x+'%';hero.style.top=y+'%'};place(from);
+const MTN_MOBS=false,lead=!MTN_MOBS?'':['블루길','황소개구리','뉴트리아'].slice(0,i).map(n=>'<img src="../images/생물/'+n+'/거대_귀여움.png" alt="">').join('');
+box.innerHTML='<div class="tmBox"><h2 class="tmHead">보스 '+(i+1)+' · '+BOSS_EP[i].place+'</h2><div class="tmMap">'+svg+pts+(lead?'<div class="tmMobs">'+lead+'</div>':'')+'<div class="tmHero"><img src="../images/주인공/표정_결심.png" alt=""></div></div><p class="tmTap">화면을 톡 하면 바로 출발</p></div>';
+const hero=box.querySelector('.tmHero'),mobs=box.querySelector('.tmMobs'),from=i===0?MTN_FOOT:MTN_PTS[i-1],to=MTN_PTS[i],nxt=MTN_PTS[i+1]||MTN_TOP;
+const mix=(a,b,k)=>[a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k],mFrom=mix(from,to,.24),mTo=mix(to,nxt,.26);
+const place=([x,y],k)=>{hero.style.left=x+'%';hero.style.top=y+'%';if(mobs){const m=mix(mFrom,mTo,k);mobs.style.left=m[0]+'%';mobs.style.top=m[1]+'%'}};place(from,0);
 epMusic('camp',4);
 const WALK=1600;let t0=0,raf=0,fin=false,steps=0;
-const finish=()=>{if(fin)return;fin=true;cancelAnimationFrame(raf);place(to);box.querySelector('.tmPt.next')?.classList.add('arrive');
+const finish=()=>{if(fin)return;fin=true;cancelAnimationFrame(raf);place(to,1);box.querySelector('.tmPt.next')?.classList.add('arrive');
 beep(880,.1,'triangle',.06,1320);setTimeout(()=>{box.classList.add('out');setTimeout(()=>{box.hidden=true;box.innerHTML='';box.className='';box.onpointerdown=null;done()},380)},650)};
 const tick=now=>{if(!t0)t0=now;const k=Math.min(1,(now-t0)/WALK),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
-hero.style.left=(from[0]+(to[0]-from[0])*e)+'%';hero.style.top=(from[1]+(to[1]-from[1])*e)+'%';
+place(mix(from,to,e),Math.min(1,e*1.25));
 hero.style.setProperty('--hop',Math.abs(Math.sin(k*Math.PI*6)));
 const s=Math.floor(k*6);if(s>steps&&k<1){steps=s;beep(s%2?520:600,.04,'sine',.035)}
 if(k<1)raf=requestAnimationFrame(tick);else finish()};
@@ -59,7 +61,8 @@ box.onpointerdown=e=>{e.preventDefault();finish()};
 }
 function startBossStory(i){
 if(G&&G.practice){beginBoss(i);return}
-showMountainWalk(i,()=>storyThen('boss'+(i+1)+'_pre',()=>beginBoss(i)));
+ecPreload(i,true);
+showMountainWalk(i,()=>storyThen('boss'+(i+1)+'_pre',()=>eyeCatch(i,()=>beginBoss(i),true)));
 }
 function playFinale(done,from){const keys=['lab','farewell','ending','finale'];const go=k=>k>=keys.length?done():storyThen(keys[k],()=>go(k+1));go(Math.max(0,keys.indexOf(from)))}
 function afterBoss(i,bp){

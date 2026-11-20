@@ -1,6 +1,6 @@
 /* © 2026 임진삼. All rights reserved. 무단 복제·수정·배포 금지 */
 'use strict';
-const DEV_CODE='3333',BOSS_PTS=[2,2,2],DEV_PTS={wave:[0,1,2,4,6],boss:[9,11,13,15]};
+const DEV_CODE='3333',BOSS_PTS=[2,2,3],DEV_PTS={wave:[0,1,2,4,6],boss:[9,11,13,16]};
 function startPlayScene(){if(window.__game){__game.scene.stop('title');__game.scene.start('play')}}
 function finalResult(){
 const avg=G.sumT?G.sum/G.sumT:0;let stars=1;if(avg>=50&&G.hits<=4)stars=2;if(avg>=68&&G.hits<=1&&G.bossFails.reduce((a,b)=>a+b,0)<=3)stars=3;
@@ -44,8 +44,15 @@ $('#btnShotSave').onclick=()=>{const a=document.createElement('a');a.href=shotUR
 $('#btnDevBack').onclick=()=>showOnly('#title');
 $('#btnDevOk').onclick=()=>{if($('#devCode').value.trim()!==DEV_CODE){$('#devMsg').textContent='비밀번호가 달라요';beep(200,.15,'square',.05);return}
 $('#devLock').hidden=true;$('#devInfo').hidden=true;$('#devMsg').textContent='';$('#devStages').hidden=false;
-const list=[...WAVES.map((w,i)=>({t:(i+1)+'차 조사',pts:DEV_PTS.wave[i],go:()=>beginWave(i),next:{wave:i}})),...BOSS.map((b,i)=>({t:'보스 '+(i+1)+' · '+b.name,pts:DEV_PTS.boss[i],go:()=>beginBoss(i),next:{boss:i}}))];
-const g=$('#devGrid');g.textContent='';list.forEach(o=>{const btn=document.createElement('button');btn.className='devStage';btn.innerHTML=o.t+'<small> · '+o.pts+'점</small>';
-btn.onclick=()=>{enterFs();audioOn();setMusic('calm');newGame();G.practice=true;award(o.pts);startPlayScene();openTree({title:'스테이지 선택 · '+o.t,next:Object.assign({known:true},o.next),respec:true,start:o.go})};g.appendChild(btn)})};
+const list=[...WAVES.map((w,i)=>({t:(i+1)+'차 조사',pts:DEV_PTS.wave[i],go:()=>beginWave(i),next:{wave:i}})),...BOSS.map((b,i)=>({t:'보스 '+(i+1)+' · '+b.name,pts:DEV_PTS.boss[i],go:()=>beginBoss(i),next:{boss:i}})),
+{t:'전투 트레이닝',pts:30,go:()=>beginTraining(),next:{boss:3},train:true}];
+const g=$('#devGrid');g.textContent='';list.forEach(o=>{const btn=document.createElement('button');btn.className='devStage'+(o.train?' devTrain':'');btn.innerHTML=o.t+'<small> · '+o.pts+'점</small>';
+btn.onclick=()=>{enterFs();audioOn();setMusic('calm');newGame();G.practice=true;award(o.pts);startPlayScene();if(o.train){openTrainTree('스테이지 선택 · '+o.t);return}openTree({title:'스테이지 선택 · '+o.t,next:Object.assign({known:true},o.next),respec:true,start:o.go})};g.appendChild(btn)})};
 $('#devCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('#btnDevOk').click()});
+$('#btnTrainSkill').onclick=()=>{if(!G||!G.training)return;G.mode='break';openTrainTree('전투 트레이닝 · 스킬 설정')};
+}
+function openTrainTree(title){G.trainTree=true;
+openTree({title,next:{boss:3,known:true},respec:true,start:()=>beginTraining()});
+$('#btnGo').textContent='▶ 트레이닝 시작';const box=$('#nextCard');box.textContent='';box.appendChild(card('bvine',300));
+box.insertAdjacentHTML('beforeend','<h3>허수아비 · 왕 가시박</h3><p class="tip">체력 '+BOSS[3].hp+' · 공격하지 않고, 뿌리를 자르지 않아도 늘 제대로 맞아요. 쓰러지면 바로 다시 일어나요. 위쪽 칸에 누적 피해와 초당 피해가 나와요.</p>');
 }

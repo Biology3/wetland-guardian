@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/story.css">
 <link rel="stylesheet" href="css/menu.css">
 <link rel="stylesheet" href="css/between.css">
+<link rel="stylesheet" href="css/eyecatch.css">
 <style>
   html,body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   #game{position:fixed;left:0;top:0}
@@ -144,7 +145,7 @@
   <div class="sheet wide">
     <h2 class="center" id="brkTitle"></h2>
     <div class="treeWrap" id="treeWrap">
-      <div id="treeCol"><div id="tree"></div><div id="synRow"></div></div>
+      <div id="treeCol"><div id="tree"></div></div>
       <div id="side">
         <div id="pointsPill"></div>
         <div id="buildName"></div>
@@ -160,6 +161,7 @@
   <div class="sheet" style="width:min(420px,100%)">
     <h2 class="center">잠깐 쉬어요</h2>
     <button class="big" id="btnResume">계속하기</button>
+    <button class="ghost" id="btnTrainSkill" hidden>스킬 설정 (전투 트레이닝)</button>
     <button class="ghost" id="btnStorySkip" hidden>이 장면 건너뛰기 ▶▶</button>
     <div class="opt"><button class="ghost fsBtn" id="btnFs2">전체화면으로 보기</button><button class="ghost" id="btnBgm">배경음 끄기</button><button class="ghost" id="btnMute">효과음 끄기</button><button class="ghost" id="btnQual">그래픽 효과 줄이기</button><button class="ghost" id="btnHome">처음으로</button></div>
   </div>
@@ -236,9 +238,11 @@
 <script src="js/story-scenes.js"></script>
 <script src="js/story.js"></script>
 <script src="js/between.js"></script>
+<script src="js/eyecatch.js"></script>
 <script src="js/part2.js"></script>
 <script src="js/rescue.js"></script>
 <script src="js/menu.js"></script>
+<script src="js/touchmenu.js"></script>
 <script src="js/TitleScene.js"></script>
 <script src="js/PlayScene.js"></script>
 <script src="js/main.js"></script>
