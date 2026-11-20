@@ -25,7 +25,7 @@ box.insertAdjacentHTML('beforeend','<h3>'+SPEC[w.intro].name+'</h3><p>'+f.f+'</p
 }
 }
 function waveCard(title,i){
-showOnly('#brk');renderNext({wave:i});$('#treeWrap').classList.add('solo');$('#brkTitle').textContent=title;$('#btnRespec').hidden=true;$('#btnGo').textContent='출발!';$('#btnGo').onclick=()=>beginWave(i);
+showOnly('#brk');renderNext({wave:i});$('#treeWrap').classList.add('solo');$('#brkTitle').textContent=title;$('#btnGo').textContent='출발!';$('#btnGo').onclick=()=>beginWave(i);
 }
 function firstWaveScreen(){waveCard('1차 조사',0)}
 function pauseGame(){if(G.mode!=='play')return;$('#warn').hidden=true;G.mode='pause';joy.id=null;joy.dx=joy.dy=0;$('#btnTrainSkill').hidden=!G.training;showOnly('#pause')}
