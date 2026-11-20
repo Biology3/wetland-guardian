@@ -51,8 +51,9 @@ beep(220,.3,'triangle',.09,130);
 }
 function retryWave(i){retryScore();G.gauge=Math.max(G.gauge,70);G.ents=[];G.cells.clear();G.plants=[];G.dying=[];beginWave(i)}
 const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
-const fsOK=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
-function enterFs(){const d=document.documentElement,r=d.requestFullscreen||d.webkitRequestFullscreen;if(!r||fsEl())return;try{const q=r.call(d,{navigationUI:'hide'});if(q&&q.catch)q.catch(()=>{})}catch(e){}}
+const IS_IPAD=/iPad/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const fsOK=!IS_IPAD&&!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+function enterFs(){const d=document.documentElement,r=d.requestFullscreen||d.webkitRequestFullscreen;if(!fsOK||!r||fsEl())return;try{const q=r.call(d,{navigationUI:'hide'});if(q&&q.catch)q.catch(()=>{})}catch(e){}}
 function exitFs(){const x=document.exitFullscreen||document.webkitExitFullscreen;if(x&&fsEl())try{const q=x.call(document);if(q&&q.catch)q.catch(()=>{})}catch(e){}}
 function syncFs(){document.querySelectorAll('.fsBtn').forEach(b=>{b.hidden=!fsOK;(b.querySelector('.fsLbl')||b).textContent=fsEl()?'전체화면 끝내기':'전체화면으로 보기'})}
 document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);
